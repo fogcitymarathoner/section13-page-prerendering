@@ -52,7 +52,7 @@ export default function LastSalesPage() {
     if (!data || !sales) {
         return <h1>Loading...</h1>;
     }
-    return (<div>sales</div>)
+    return (<div>sales{data.s1.username}</div>)
     if (sales.length > 0) {
         return (
             <div>
