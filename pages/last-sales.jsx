@@ -1,73 +1,89 @@
-import {useEffect, useState} from "react";
-import useSWR from "swr";
+import { useEffect, useState } from 'react';
+import useSWR from 'swr';
 
-// const url = 'https://venefish-107fe-default-rtdb.firebaseio.com/sales.json'
+function LastSalesPage(props) {
 
-const fetcher = (url) => fetch(url).then((res) => res.json());
+    const [sales, setSales] = useState(props.sales);
+    // const [isLoading, setIsLoading] = useState(false);
 
-export default function LastSalesPage() {
-    const [sales, setSales] = useState([]);
-    const {data, error} = useSWR('https://venefish-107fe-default-rtdb.firebaseio.com/sales.json', fetcher)
-    console.log(data)
-    useEffect((data) => {
-        console.log('useEffect');
-        console.log(data)
+    const { data, error } = useSWR(
+        'https://venefish-107fe-default-rtdb.firebaseio.com/sales.json',
+        (url) => fetch(url).then(res => res.json())
+    );
+
+    useEffect(() => {
+        console.log(data);
         if (data) {
-            console.log('data ' + data)
-            const transformedSales = []
+            const transformedSales = [];
+
             for (const key in data) {
                 transformedSales.push({
                     id: key,
                     username: data[key].username,
                     volume: data[key].volume,
-                })
+                });
             }
+
             setSales(transformedSales);
         }
     }, [data]);
-    /*useEffect(() => {
-        setIsLoading(true);
-        fetch('https://venefish-107fe-default-rtdb.firebaseio.com/sales.json')
-            .then((response) => response.json())
-            .then(data => {
-                console.log(data);
-                const transformedSales = []
-                for (const key in data) {
-                    transformedSales.push({
-                        id: key,
-                        username: data[key].username,
-                        volume: data[key].volume,
-                    })
-                }
-                console.log(transformedSales)
-                setSales(transformedSales);
-                console.log(sales)
-                setIsLoading(false);
-            })
-    }, [])*/
+
+    // useEffect(() => {
+    //   setIsLoading(true);
+    //   fetch('https://nextjs-course-c81cc-default-rtdb.firebaseio.com/sales.json')
+    //     .then((response) => response.json())
+    //     .then((data) => {
+    //       const transformedSales = [];
+
+    //       for (const key in data) {
+    //         transformedSales.push({
+    //           id: key,
+    //           username: data[key].username,
+    //           volume: data[key].volume,
+    //         });
+    //       }
+
+    //       setSales(transformedSales);
+    //       setIsLoading(false);
+    //     });
+    // }, []);
 
     if (error) {
-        return <h1>Failed to load</h1>;
-    }
-    if (!data || !sales) {
-        return <h1>Loading...</h1>;
-    }
-    return (<div>sales{data.s1.username}</div>)
-    if (sales.length > 0) {
-        return (
-            <div>
-                <h1>Last Sales</h1>
-                <ul>
-                    {sales.map((sale) => (
-                        <li key={sale.id}>
-                            {sale.username} - ${sale.volume}
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        )
-    } else {
-        return <h1>No Sales</h1>
+        return <p>Failed to load.</p>;
     }
 
+    if (!data && !sales) {
+        return <p>Loading...</p>;
+    }
+
+    return (
+        <ul>
+            {sales.map((sale) => (
+                <li key={sale.id}>
+                    {sale.username} - ${sale.volume}
+                </li>
+            ))}
+        </ul>
+    );
 }
+
+export async function getStaticProps() {
+    const response = await fetch(
+        'https://venefish-107fe-default-rtdb.firebaseio.com/sales.json'
+    );
+    const data = await response.json();
+
+    const transformedSales = [];
+
+    for (const key in data) {
+        transformedSales.push({
+            id: key,
+            username: data[key].username,
+            volume: data[key].volume,
+        });
+    }
+
+    return { props: { sales: transformedSales } };
+}
+
+export default LastSalesPage;
